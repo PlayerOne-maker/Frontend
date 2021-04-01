@@ -1,6 +1,9 @@
-import React, { createContext, useState } from 'react'
+import React, { createContext, useState ,useEffect } from 'react'
+import {useQuery} from '@apollo/client'
+import Router from 'next/router'
 
 import { User } from '../types'
+import {ME} from '../apollo/querys'
 
 interface Props {}
 
@@ -28,9 +31,32 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
   const [authAction, setAuthAction] = useState<Actions>('close')
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null)
 
+  const {data } = useQuery<{me : User}>(ME)
+
+  useEffect(() => {
+    if(data?.me) setLoggedInUser(data.me)
+  },[data?.me])
+
+  useEffect(() => {
+    const syncSignout = (e: StorageEvent) => {
+      if (e.key === 'signout'){
+
+        setLoggedInUser(null)
+
+        //Push Router to Homepage
+        Router.push('/')
+      }
+    }
+
+    window.addEventListener('storage',syncSignout)
+
+    return () => window.removeEventListener('storage',syncSignout)
+  },[])
+
   const handleAuthAction: HandleAuthAction = (action) => {
     setAuthAction(action)
   }
+  
 
   const setAuthUser = (user: User | null) => setLoggedInUser(user)
 

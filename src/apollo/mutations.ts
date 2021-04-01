@@ -16,3 +16,25 @@ export const SIGN_UP = gql`
     }
   }
 `
+
+
+export const SIGN_OUT = gql`
+mutation {
+  signout{
+    message
+  }
+}
+`
+
+export const SIGN_IN = gql`
+mutation SIGN_IN($password : String! , $email: String!){
+  signin(password:$password,email:$email){
+    username
+    id
+    createdAt
+    email
+    roles
+  }
+}
+
+`

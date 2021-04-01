@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {useMutation } from '@apollo/client'
+import {SIGN_OUT} from '../apollo/mutations'
 
 import { AuthContext } from '../context/AuthContextProvider'
 import { isAdmin } from '../helpers/authHelpers'
@@ -99,6 +101,26 @@ const NavBar: React.FC<Props> = () => {
   )
 
   const router = useRouter()
+  
+  const [signout] = useMutation<{signout:{message: string}}>(SIGN_OUT)
+
+  const handleSignout = async () => {
+    try {
+      const res = await signout()
+
+      if(res?.data?.signout?.message){
+        
+        setAuthUser(null)
+        // Sync signout
+        window.localStorage.setItem('signout', Date.now().toString())
+        
+        router.push('/')
+
+      }
+    } catch (error) {
+      alert('Sorry cannot process')
+    }
+  }
 
   return (
     <Header>
@@ -137,7 +159,7 @@ const NavBar: React.FC<Props> = () => {
         </Ul>
         <Actions>
           {loggedInUser ? (
-            <button onClick={() => setAuthUser(null)}>Sign Out</button>
+            <button onClick={handleSignout} >Sign Out</button>
           ) : (
             <>
               <button onClick={() => handleAuthAction('signin')}>
@@ -145,7 +167,7 @@ const NavBar: React.FC<Props> = () => {
               </button>
               <button onClick={() => handleAuthAction('signup')}>
                 Sign Up
-              </button>
+              </button> 
             </>
           )}
         </Actions>
