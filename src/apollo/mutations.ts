@@ -38,3 +38,23 @@ mutation SIGN_IN($password : String! , $email: String!){
 }
 
 `
+
+export const REQUEST_RESET_PASSWORD = gql`
+  mutation REQUEST_RESET_PASSWORD(
+    $email : String!
+    ){
+    requestResetPassword(
+      email:$email
+      ){
+      message
+    }
+  }
+`
+
+export const RESET_PASSWORD = gql`
+mutation RESET_PASSWORD($token:String!,$password:String!){
+  resetPassword(token:$token,password:$password){
+    message
+  }
+}
+`

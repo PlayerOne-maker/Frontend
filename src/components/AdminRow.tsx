@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -20,18 +20,15 @@ const DeleteBtn = styled.button`
 
 const AdminRow: React.FC<Props> = ({ user }) => {
   const { roles } = user
-  const initialState = useCallback(
-    () => ({
-      CLIENT: roles.includes('CLIENT'),
+  const initialState = {
       ITEMEDITOR: roles.includes('ITEMEDITOR'),
       ADMIN: roles.includes('ADMIN'),
-    }),
-    []
-  )
+    }
 
   const [isEditig, setIsEditing] = useState(false)
   const [roleState, setRoleState] = useState(initialState)
 
+  console.log(roleState)
   return (
     <tr key={user.id}>
       {/* Name */}
@@ -52,21 +49,14 @@ const AdminRow: React.FC<Props> = ({ user }) => {
         }}
         className='td_role'
       >
-        {roleState.CLIENT ? (
+       
           <FontAwesomeIcon
             icon={['fas', 'check-circle']}
             className='true'
             size='lg'
             style={{ color: 'black', cursor: 'not-allowed' }}
           />
-        ) : (
-          <FontAwesomeIcon
-            icon={['fas', 'times-circle']}
-            className='false'
-            size='lg'
-            style={{ color: 'lightgray', cursor: 'not-allowed' }}
-          />
-        )}
+        
       </td>
 
       {/* item editor role */}
@@ -75,7 +65,7 @@ const AdminRow: React.FC<Props> = ({ user }) => {
           background: !isEditig ? 'white' : undefined,
           cursor: isEditig ? 'pointer' : undefined,
         }}
-        className='td_role'
+        className='td_role' onClick={() => setRoleState((prev) => ({...prev, ITEMEDITOR: !prev.ITEMEDITOR}))}
       >
         {roleState.ITEMEDITOR ? (
           <FontAwesomeIcon
@@ -100,7 +90,7 @@ const AdminRow: React.FC<Props> = ({ user }) => {
           background: !isEditig ? 'white' : undefined,
           cursor: isEditig ? 'pointer' : undefined,
         }}
-        className='td_role'
+        className='td_role' onClick={() => setRoleState((prev) => ({...prev, ADMIN: !prev.ADMIN}))}
       >
         <>
           {roleState.ADMIN ? (
