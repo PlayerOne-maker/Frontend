@@ -12,3 +12,16 @@ query{
     }
   }
 `
+
+export const USER = gql`
+query {
+  users{
+    username
+    password
+    email
+    id
+    createdAt
+    roles
+  }
+}
+`

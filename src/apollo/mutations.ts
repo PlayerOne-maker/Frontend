@@ -58,3 +58,20 @@ mutation RESET_PASSWORD($token:String!,$password:String!){
   }
 }
 `
+
+export const UPDATE_USERROLE = gql`
+mutation UPDATE_USERROLE(
+  $userId: String! ,$newRoles: [String!]!
+  ){
+  updateRoles(
+    userId:$userId
+    newRoles:$newRoles
+  ){
+    id
+    username
+    email
+    roles
+    createdAt
+  }
+}
+`

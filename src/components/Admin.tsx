@@ -2,7 +2,11 @@ import React from 'react'
 import styled from 'styled-components'
 
 import AdminRow from './AdminRow'
-import { users } from '../helpers/data'
+import { USER } from '../apollo/querys'
+import { useQuery } from '@apollo/client'
+import { User } from '../types'
+import Loader from 'react-loader-spinner'
+import { isSuperAdmin } from '../helpers/authHelpers'
 
 const Div = styled.div`
   width: 100%;
@@ -57,47 +61,57 @@ const Table = styled.table`
   }
 `
 
-const Admin: React.FC = () => {
-  return (
-    <Div>
-      <h3>Permission Management</h3>
-      <Table>
-        <thead>
-          <tr>
-            {/* Header */}
-            <th rowSpan={2} style={{ width: '25%' }}>
-              Name
-            </th>
-            <th rowSpan={2} style={{ width: '20%' }}>
-              Email
-            </th>
-            <th rowSpan={2} style={{ width: '15%' }}>
-              Created At
-            </th>
-            <th colSpan={4} style={{ width: '25%' }}>
-              Role
-            </th>
-            <th rowSpan={2} style={{ width: '10%' }}>
-              Edit Roles
-            </th>
-          </tr>
-          {/* Edit Roles Sub Headers */}
-          <tr>
-            <th>Client</th>
-            <th>Editor</th>
-            <th>Admin</th>
-            <th>Super</th>
-          </tr>
-        </thead>
+const Admin: React.FC<{ admin: User | null }> = ({ admin }) => {
 
-        <tbody>
-          {users.map((user) => (
-            <AdminRow user={user} key={user.id} />
-          ))}
-        </tbody>
-      </Table>
-    </Div>
-  )
+  const { data, loading, error } = useQuery<{ users: User[] }>(USER, { fetchPolicy: 'network-only', })
+
+  return loading ? (<Loader type='Oval' width={100} height={100} timeout={30000} />)
+    : error ? <p>Someting wrong!!!</p> : (
+      <Div>
+        <h3>Permission Management</h3>
+        <Table>
+          <thead>
+            <tr>
+              {/* Header */}
+              <th rowSpan={2} style={{ width: '25%' }}>
+                Name
+              </th>
+              <th rowSpan={2} style={{ width: '20%' }}>
+                Email
+              </th>
+              <th rowSpan={2} style={{ width: '15%' }}>
+                Created At
+              </th>
+              {isSuperAdmin(admin) && (
+                <>
+                  <th colSpan={4} style={{ width: '25%' }}>
+                    Role
+                  </th>
+                  <th rowSpan={2} style={{ width: '10%' }}>
+                    Edit Roles
+                  </th>
+                </>
+              )}
+            </tr>
+            {/* Edit Roles Sub Headers */}
+            {isSuperAdmin(admin) && (
+              <tr>
+                <th>Client</th>
+                <th>Editor</th>
+                <th>Admin</th>
+                <th>Super</th>
+              </tr>
+            )}
+          </thead>
+
+          <tbody>
+            {data && data.users.map((user) => (
+              <AdminRow user={user} admin={admin} key={user.id} />
+            ))}
+          </tbody>
+        </Table>
+      </Div>
+    )
 }
 
 export default Admin
