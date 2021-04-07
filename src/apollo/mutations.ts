@@ -75,3 +75,11 @@ mutation UPDATE_USERROLE(
   }
 }
 `
+
+export const DELETE_USER = gql`
+mutation DELETE_USER($userId: String!){
+  deleteUser(userId:$userId){
+    message
+  }
+}
+` 

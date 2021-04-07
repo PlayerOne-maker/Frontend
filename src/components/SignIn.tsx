@@ -69,11 +69,11 @@ const SignIn: React.FC<Props> = () => {
         <StyledSocial>
           <button className='facebook'>
             <FontAwesomeIcon icon={['fab', 'facebook-f']} size='lg' />
-            <a>Sign in with Facebook</a>
+            <a href="http://localhost:5000/auth/facebook">Sign in with Facebook</a>
           </button>
           <button className='google'>
             <FontAwesomeIcon icon={['fab', 'google']} />
-            <a>Sign in with Google</a>
+            <a href="http://localhost:5000/auth/google">Sign in with Google</a>
           </button>
         </StyledSocial>
 

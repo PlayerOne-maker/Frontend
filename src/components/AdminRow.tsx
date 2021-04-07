@@ -6,7 +6,8 @@ import Loader from 'react-loader-spinner'
 
 import { User, Role } from '../types'
 import { isSuperAdmin } from '../helpers/authHelpers'
-import { UPDATE_USERROLE } from '../apollo/mutations'
+import { DELETE_USER, UPDATE_USERROLE } from '../apollo/mutations'
+import { USER } from '../apollo/querys'
 
 interface Props {
   user: User
@@ -32,10 +33,32 @@ const AdminRow: React.FC<Props> = ({ user, admin }) => {
   const [isEditing, setIsEditing] = useState(false)
   const [roleState, setRoleState] = useState(initialState)
 
-  const [updateRoles, { loading, error }] = useMutation<
+  let [updateRoles, { loading, error }] = useMutation<
     { updateRoles: User },
     { userId: string; newRoles: Role[] }
   >(UPDATE_USERROLE)
+
+
+  let [deleteUser, delete_res] = useMutation<
+    { deleteUser: { massage: string } },
+    { userId: string }
+  >(DELETE_USER)
+
+  const handleDeteleUser = async (userId: string) => {
+    try {
+      const res = await deleteUser({
+        variables: { userId },
+        refetchQueries: [{ query: USER }]
+      })
+
+      if(res.data?.deleteUser.massage) {
+        alert(res.data?.deleteUser.massage)
+      }
+
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     if (error)
@@ -60,7 +83,7 @@ const AdminRow: React.FC<Props> = ({ user, admin }) => {
         }
       }
 
-      const response = await updateRoles({ variables: { userId, newRoles } })
+      const response = await updateRoles({ variables: { userId, newRoles },refetchQueries: [{query:USER}] })
 
       if (response.data?.updateRoles) {
         setIsEditing(false)
@@ -79,7 +102,7 @@ const AdminRow: React.FC<Props> = ({ user, admin }) => {
       <td>{user.email}</td>
 
       {/* CreatedAt */}
-      <td>{user.createdAt}</td>
+      <td>{new Date(user.createdAt).toLocaleDateString()}</td>
 
       {/* Manage Roles Section */}
       {/* client role */}
@@ -110,10 +133,10 @@ const AdminRow: React.FC<Props> = ({ user, admin }) => {
             onClick={
               isEditing
                 ? () =>
-                    setRoleState((prev) => ({
-                      ...prev,
-                      ITEMEDITOR: !prev.ITEMEDITOR,
-                    }))
+                  setRoleState((prev) => ({
+                    ...prev,
+                    ITEMEDITOR: !prev.ITEMEDITOR,
+                  }))
                 : undefined
             }
           >
@@ -144,7 +167,7 @@ const AdminRow: React.FC<Props> = ({ user, admin }) => {
             onClick={
               isEditing
                 ? () =>
-                    setRoleState((prev) => ({ ...prev, ADMIN: !prev.ADMIN }))
+                  setRoleState((prev) => ({ ...prev, ADMIN: !prev.ADMIN }))
                 : undefined
             }
           >
@@ -217,15 +240,28 @@ const AdminRow: React.FC<Props> = ({ user, admin }) => {
               <button onClick={() => setIsEditing(true)}>Edit</button>
             </td>
           )}
+          {!isSuperAdmin(user) && (
+            <td>
+              <DeleteBtn 
+                onClick={() => {
+                  if(!confirm('Are you sure to delete.')) return
 
-          <td>
-            <DeleteBtn
-              style={{ cursor: isEditing ? 'not-allowed' : undefined }}
-              disabled={isEditing}
-            >
-              <FontAwesomeIcon icon={['fas', 'trash-alt']} size='lg' />
-            </DeleteBtn>
-          </td>
+                  handleDeteleUser(user.id)
+                }}
+                style={{ cursor: isEditing ? 'not-allowed' : undefined }}
+                disabled={isEditing}
+              >
+                {delete_res.loading ? (              <Loader
+                type='Oval'
+                color='teal'
+                width={30}
+                height={30}
+                timeout={30000}
+              />)
+              : (<FontAwesomeIcon icon={['fas', 'trash-alt']} size='lg' />)}
+              </DeleteBtn>
+            </td>
+          )}
         </>
       )}
     </tr>
